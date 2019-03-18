@@ -147,7 +147,7 @@ classdef NJM < handle
 		function njm = RunWithExcitation()
 			
 			% Fekvõrendõr
-			A = 0.05;	% [m]
+			A = 0.055;	% [m]
 			
 			w = 2*pi/0.2;
 			z = @(t) (t >= 1) * (t <= 1.2) * ( -A*cos(w*t) + A );
