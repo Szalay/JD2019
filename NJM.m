@@ -149,7 +149,7 @@ classdef NJM < handle
 			% Fekvõrendõr
 			A = 0.055;	% [m]
 			
-			w = 2*pi/0.2;
+			w = 2*pi/0.15;
 			z = @(t) (t >= 1) * (t <= 1.2) * ( -A*cos(w*t) + A );
 			v = @(t) (t >= 1) * (t <= 1.2) * ( A*w*sin(w*t) );
 			
