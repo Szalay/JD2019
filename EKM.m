@@ -23,8 +23,8 @@ classdef EKM
 		pV2 = 1.41;
 		pV3 = 0.097;
 		
-		V_0 = 0.59;			% [cm^3]
-		T_H = 5e-3;			% [s]
+		V_0 = 0.59;			% [cm^3], haszontalan térfogat
+		T_H = 10e-3;		% [s], fékholtidõ
 		
 		A_F = 4e-4;			% [m^2], fékmunkahenger keresztmetszete
 		R_F = 0.2;			% [m], a féktárcsa átlagos sugara
@@ -33,8 +33,72 @@ classdef EKM
 		p_0 = 20000;		% [kPa]
 		
 		% Kezdeti értékek
-		v_0 = 20;				% [m/s]
-		w_0 = EKM.v_0/EKM.R;	%  [rad/s]
+		v_0 = 50/3.6;			% [m/s]
+		w_0 = EKM.v_0/EKM.R;	% [rad/s]
+	end
+	
+	properties
+		T;
+		
+		c;
+		s_x;
+		mu_x;
+		
+		w;
+		v_x;
+	end
+	
+	methods
+		
+		function this = EKM()
+			
+			% Szimuláció
+			[this.T, ~, Y] = sim('ekmsl');
+			
+			this.c = Y(:, 1);
+			this.s_x = Y(:, 2);
+			this.mu_x = Y(:, 3);
+			
+			this.w = Y(:, 4);
+			this.v_x = Y(:, 5);
+			
+		end
+		
+		function Plot(this)
+			figure(489);
+			
+			% Keréksebesség
+			yyaxis left;
+			ylim([-5, 40]);
+			hold on;
+			title('Vészfékezés ABS-szel');
+			xlabel('Idõ, {\itt}, [s]');
+			ylabel('Sebesség és keréksebesség');
+			
+			pw = plot(this.T, this.w, 'b-', 'LineWidth', 3);
+			pvx = plot(this.T, this.v_x, 'r-', 'LineWidth', 3);
+			
+			plot(this.T, this.v_x/EKM.R, 'r--', 'LineWidth', 1);
+			plot(this.T(this.T >= 0.2), this.v_x(this.T >= 0.2)*(-0.1 + 1)/EKM.R, 'b--');
+			
+			k = [10, 40];
+			plot([0.2, 0.2], k, 'k--');
+			text(0.21, mean(k), {'A fékezés ', 'kezdete'});
+			
+			% Csúszás
+			yyaxis right;
+			ylim([-1, 8]);
+			ylabel('Vezérlõjel, csúszás, súrlódási tényezõ');
+			
+			pc = plot(this.T, this.c, 'k-', 'LineWidth', 3);
+			psx = plot(this.T, this.s_x, 'y-', 'LineWidth', 3);
+			pmu = plot(this.T, this.mu_x, 'm-', 'LineWidth', 3);
+			
+			legend([pw, pvx, pc, psx, pmu], { ...
+				'\omega', 'v_x', 'c', 's_x', '\mu_x' ...
+				});
+		end
+		
 	end
 	
 	methods (Static)
@@ -57,6 +121,7 @@ classdef EKM
 			if V > EKM.V_0
 				p_2 = EKM.pV0 * ( V - EKM.pV1 * (1 - exp( -(V - EKM.pV3)/EKM.pV2 )) );
 			else
+				% Még nem érnek a fékpofák a féktárcsához
 				p_2 = 0;
 			end
 		end
@@ -75,6 +140,30 @@ classdef EKM
 			end
 		end
 		
+		function PlotPacejka()
+			s_x = -1:0.01:1;
+			mu_x = EKM.Pacejka(s_x);
+			
+			figure(576);
+			hold on;
+			grid on;
+			
+			title('A Pacejka-modell szerinti {\it\mu_x}({\its_x}) görbe');
+			
+			xlabel('Csúszás, {\its_x}, [1]');
+			ylabel('Hosszirányú erõátadási tényezõ, {\it\mu_x}, [1]');
+			
+			plot(s_x, mu_x, 'k-', 'LineWidth', 3);
+		end
+		
+		function ekm = Run()
+			
+			ekm = EKM();
+			ekm.Plot();
+			
+		end
+		
 	end
+	
 end
 
