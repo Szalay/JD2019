@@ -106,7 +106,8 @@ classdef EKM
 		function mu_x = Pacejka(s_x)
 			b = 3.76;
 			c = 2.7;
-			d = 1;			% mu_max
+			%d = 1;			% mu_max
+			d = 0.7;
 			e = 1;
 			
 			% Magic Formula
